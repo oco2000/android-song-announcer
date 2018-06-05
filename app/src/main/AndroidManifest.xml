@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="org.oco.songannouncer">
 
     <application
@@ -18,6 +19,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".service.SongAnnouncerService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <receiver
+            android:name=".receiver.music.RocketMusicPlayerReceiver"
+            android:exported="true"
+            android:enabled="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="com.jrtstudio.AnotherMusicPlayer.metachanged" />
+                <action android:name="com.jrtstudio.AnotherMusicPlayer.playstatechanged" />
+                <action android:name="com.jrtstudio.AnotherMusicPlayer.playbackcomplete" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.music.LastFMPlayerReceiver"
+            android:exported="true"
+            android:enabled="true"
+            tools:ignore="ExportedReceiver">
+            <intent-filter>
+                <action android:name="net.jjc1138.android.scrobbler.action.MUSIC_STATUS" />
+                <action android:name="com.adam.aslfms.notify.playstatechanged" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
