@@ -63,7 +63,7 @@ public abstract class CommonMusicAppReceiver extends BroadcastReceiver {
                     }
 
                     if (isInitialStickyBroadcast()) {
-                        Loggi.w("CommonMusicAppReceiver.onReceive() received cached sticky broadcast, WAIL won't process it");
+                        Loggi.w("CommonMusicAppReceiver.onReceive() received cached sticky broadcast, the App won't process it");
                         return null;
                     }
 

@@ -2,23 +2,11 @@ package org.oco.songannouncer.service;
 
 import java.util.Locale;
 import android.app.Service;
-import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 import android.speech.tts.TextToSpeech;
-
-import org.json.JSONObject;
 
 import org.oco.songannouncer.util.Loggi;
 import org.oco.songannouncer.util.IntentUtil;
@@ -26,42 +14,12 @@ import org.oco.songannouncer.util.AsyncTaskExecutor;
 import org.oco.songannouncer.models.Track;
 import org.oco.songannouncer.receiver.music.CommonMusicAppReceiver;
 
-/* import com.artemzin.android.wail.R;
-import com.artemzin.android.wail.api.lastfm.LFApiException;
-import com.artemzin.android.wail.api.lastfm.LFTrackApi;
-import com.artemzin.android.wail.api.lastfm.model.request.LFTrackRequestModel;
-import com.artemzin.android.wail.api.lastfm.model.response.LFScrobbleResponseModel;
-import com.artemzin.android.wail.api.network.NetworkException;
-import com.artemzin.android.wail.notifications.SoundNotificationsManager;
-import com.artemzin.android.wail.notifications.StatusBarNotificationsManager;
-import com.artemzin.android.wail.storage.WAILSettings;
-import com.artemzin.android.wail.storage.db.IgnoredPlayersDBHelper;
-import com.artemzin.android.wail.storage.db.LovedTracksDBHelper;
-import com.artemzin.android.wail.storage.db.TracksDBHelper;
-import com.artemzin.android.wail.storage.model.Track;
-import com.artemzin.android.wail.ui.activity.BaseActivity;
-import com.artemzin.android.wail.ui.activity.WAILLoveWidget;
-import com.artemzin.android.wail.util.AsyncTaskExecutor;
-import com.artemzin.android.wail.util.IntentUtil;
-import com.artemzin.android.wail.util.NetworkUtil;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.MapBuilder;
-*/
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 public class SongAnnouncerService extends Service {
 
 
     public static final String INTENT_ACTION_HANDLE_TRACK = "INTENT_ACTION_HANDLE_TRACK";
 
     private static volatile Track lastUpdatedNowPlayingTrackInfo;
-
-    private long lastScrobbleTime = 0;
-
-    private Intent lastIntent;
 
     private TextToSpeech tts;
 
@@ -76,7 +34,7 @@ public class SongAnnouncerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Loggi.i("WAILService onCreate()");
+        Loggi.i("Service onCreate()");
 
         tts=new TextToSpeech(SongAnnouncerService.this, new TextToSpeech.OnInitListener() {
 
@@ -90,7 +48,7 @@ public class SongAnnouncerService extends Service {
                     }
                 }
                 else
-                    Loggi.e("TTS Initilization Failed!");
+                    Loggi.e("TTS Initialization Failed!");
             }
         });
 
@@ -134,7 +92,7 @@ public class SongAnnouncerService extends Service {
 
     private synchronized void updateNowPlaying(Track track) {
         if (track == null) {
-            Loggi.w("WAILService.updateNowPlaying() track is null, skipping");
+            Loggi.w("Service.updateNowPlaying() track is null, skipping");
             return;
         }
 
@@ -143,17 +101,17 @@ public class SongAnnouncerService extends Service {
 
     private void handleTrack(final Intent intent) {
 /*
-        if (intent == null || !WAILSettings.isEnabled(this)) {
-            Loggi.w("WAILService track is not handled because WAIL is disabled");
+        if (intent == null || !Settings.isEnabled(this)) {
+            Loggi.w("Service track is not handled because  is disabled");
             return;
         }
 */
 
-        final String player = intent.getStringExtra(CommonMusicAppReceiver.EXTRA_PLAYER_PACKAGE_NAME);
+//        final String player = intent.getStringExtra(CommonMusicAppReceiver.EXTRA_PLAYER_PACKAGE_NAME);
 
 /*
         if (ignoredPlayersDBHelper.contains(player)) {
-            Loggi.w(String.format("WAILService track is not handled because the player %s is ignored", player));
+            Loggi.w(String.format("Service track is not handled because the player %s is ignored", player));
             return;
         }
 */
@@ -161,7 +119,7 @@ public class SongAnnouncerService extends Service {
         AsyncTaskExecutor.executeConcurrently(new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                Loggi.i("\n\n----------\nWAILService track handling: " + intent);
+                Loggi.i("\n\n----------\nService track handling: " + intent);
 
                 final String extraAction = intent.getStringExtra(CommonMusicAppReceiver.EXTRA_ACTION);
 
