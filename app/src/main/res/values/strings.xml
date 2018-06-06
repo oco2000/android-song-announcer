@@ -6,13 +6,21 @@
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
+    <string name="pref_messages_title">Popup Messages</string>
 
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <string name="pref_title_enable_messages">Enable popup messages</string>
+
+    <string name="pref_title_message_format">Message format</string>
+    <string name="pref_default_message_format">%T by %A</string>
+
+    <string name="pref_speech_title">Speech</string>
+
+    <string name="pref_title_enable_speech">Enable Speech</string>
+
+    <string name="pref_title_speech_format">Speech format</string>
+    <string name="pref_default_speech_format">Now playing %T by %A</string>
+
+
 
     <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
     <string-array name="pref_example_list_titles">

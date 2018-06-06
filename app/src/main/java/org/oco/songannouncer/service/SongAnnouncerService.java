@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.widget.Toast;
 import android.speech.tts.TextToSpeech;
 
+import org.oco.songannouncer.util.Settings;
 import org.oco.songannouncer.util.Loggi;
 import org.oco.songannouncer.util.IntentUtil;
 import org.oco.songannouncer.util.AsyncTaskExecutor;
@@ -144,10 +145,14 @@ public class SongAnnouncerService extends Service {
             @Override
             protected void onPostExecute(Void aVoid) {
                 if (lastUpdatedNowPlayingTrackInfo != null) {
-                    String text = "Now playing " + lastUpdatedNowPlayingTrackInfo.getTrack() + " by " + lastUpdatedNowPlayingTrackInfo.getArtist();
-                    Toast.makeText(SongAnnouncerService.this, text, Toast.LENGTH_LONG).show();
+                    String text;
+                    if (Settings.isMessagesEnabled(SongAnnouncerService.this)) {
+                        text = lastUpdatedNowPlayingTrackInfo.format(Settings.getMessageFormat(SongAnnouncerService.this));
+                        Toast.makeText(SongAnnouncerService.this, text, Toast.LENGTH_LONG).show();
+                    }
 
-                    if (tts != null) {
+                    if (Settings.isSpeechEnabled(SongAnnouncerService.this) && tts != null) {
+                        text = lastUpdatedNowPlayingTrackInfo.format(Settings.getSpeechFormat(SongAnnouncerService.this));
                         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
                     }
                 }
