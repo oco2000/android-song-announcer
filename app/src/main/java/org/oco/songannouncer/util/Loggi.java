@@ -4,7 +4,7 @@ import android.util.Log;
 
 public class Loggi {
 
-    private static final String TAG = "SA";
+    private static final String TAG = "SongAnnouncer";
     private static final boolean isEnabled = true;
 
     private Loggi() {}

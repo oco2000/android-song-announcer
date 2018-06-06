@@ -26,25 +26,22 @@
             android:exported="false" />
 
         <receiver
-            android:name=".receiver.music.RocketMusicPlayerReceiver"
+            android:name=".receiver.music.SimpleLastFMReceiver"
             android:exported="true"
             android:enabled="true"
             tools:ignore="ExportedReceiver">
             <intent-filter>
-                <action android:name="com.jrtstudio.AnotherMusicPlayer.metachanged" />
-                <action android:name="com.jrtstudio.AnotherMusicPlayer.playstatechanged" />
-                <action android:name="com.jrtstudio.AnotherMusicPlayer.playbackcomplete" />
+                <action android:name="com.adam.aslfms.notify.playstatechanged" />
             </intent-filter>
         </receiver>
 
         <receiver
-            android:name=".receiver.music.LastFMPlayerReceiver"
+            android:name=".receiver.music.ScrobbleDroidReceiver"
             android:exported="true"
             android:enabled="true"
             tools:ignore="ExportedReceiver">
             <intent-filter>
                 <action android:name="net.jjc1138.android.scrobbler.action.MUSIC_STATUS" />
-                <action android:name="com.adam.aslfms.notify.playstatechanged" />
             </intent-filter>
         </receiver>
     </application>

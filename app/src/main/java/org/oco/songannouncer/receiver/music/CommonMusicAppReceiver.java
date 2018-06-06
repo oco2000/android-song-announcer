@@ -10,13 +10,7 @@ import org.oco.songannouncer.service.SongAnnouncerService;
 import org.oco.songannouncer.util.AsyncTaskExecutor;
 import org.oco.songannouncer.util.IntentUtil;
 import org.oco.songannouncer.util.Loggi;
-
-/*
-import com.artemzin.android.wail.storage.model.Track;
-import com.artemzin.android.wail.util.StackTraceUtil;
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.MapBuilder;
-*/
+import org.oco.songannouncer.models.Track;
 
 public abstract class CommonMusicAppReceiver extends BroadcastReceiver {
 
@@ -37,7 +31,7 @@ public abstract class CommonMusicAppReceiver extends BroadcastReceiver {
         asyncProcessTheIntent(context, intent);
     }
 
-    protected final Intent newIntentForWAILService(Context context) {
+    protected final Intent newIntentForService(Context context) {
         return new Intent(context, SongAnnouncerService.class);
     }
 
@@ -73,45 +67,51 @@ public abstract class CommonMusicAppReceiver extends BroadcastReceiver {
                         return null;
                     }
 
-                    final Intent intentForWAILService = handleIntent(context, intent);
+                    final Intent intentForService = handleIntent(context, intent);
 
-                    if (intentForWAILService != null) {
-                        intentForWAILService.setAction(SongAnnouncerService.INTENT_ACTION_HANDLE_TRACK);
-                        intentForWAILService.putExtra(EXTRA_ACTION, intent.getAction());
-                        intentForWAILService.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
+                    if (intentForService != null) {
+                        intentForService.setAction(SongAnnouncerService.INTENT_ACTION_HANDLE_TRACK);
+                        intentForService.putExtra(EXTRA_ACTION, intent.getAction());
+                        intentForService.putExtra(EXTRA_TIMESTAMP, System.currentTimeMillis());
 
-                        return intentForWAILService;
+                        return intentForService;
                     } else {
                         Loggi.w("CommonMusicAppReceiver.onReceive() did not send intent for service, handleIntent() returns null, skipping intent");
                         return null;
                     }
                 } catch (Exception e) {
-/*
-                    final String log = "CommonMusicAppReceiver.onReceive() exception while handleIntent(): " + StackTraceUtil.getStackTrace(e);
+
+                    final String log = "CommonMusicAppReceiver.onReceive() exception while handleIntent(): " + e.toString();
                     Loggi.e(log);
-                    EasyTracker.getInstance(context).send(MapBuilder.createException(log, false).build());
-*/
+
                     return null;
                 }
             }
 
             @Override
-            protected void onPostExecute(Intent intentForWAILService) {
-                if (intentForWAILService != null) {
-                    context.startService(intentForWAILService);
+            protected void onPostExecute(Intent intentForService) {
+                if (intentForService != null) {
+                    context.startService(intentForService);
                 }
             }
         });
     }
 
     protected Intent handleIntent(Context context, Intent originalIntent) {
-        final Intent handleTrackIntent = newIntentForWAILService(context);
+        final Intent handleTrackIntent = newIntentForService(context);
 
-        handleTrackIntent.putExtra(EXTRA_PLAYER_PACKAGE_NAME, originalIntent.getAction().substring(0, originalIntent.getAction().lastIndexOf('.')));
+        handleTrackIntent.putExtra(EXTRA_PLAYER_PACKAGE_NAME, originalIntent.getAction());
 
         handleTrackIntent.putExtra(EXTRA_ID, IntentUtil.getLongOrIntExtra(originalIntent, -1, "id", "trackid", "trackId"));
 
-        final Boolean isPlaying = IntentUtil.getBoolOrNumberAsBoolExtra(originalIntent, null, "playing", "playstate", "isPlaying", "isplaying", "is_playing");
+        Boolean isPlaying = false;
+
+        if (originalIntent.getAction() == "com.adam.aslfms.notify.playstatechanged") {
+            int state = originalIntent.getIntExtra("state", 2);
+            isPlaying = state < 2;
+        } else {
+            isPlaying = IntentUtil.getBoolOrNumberAsBoolExtra(originalIntent, null, "playing", "playstate", "isPlaying", "isplaying", "is_playing");
+        }
 
         if (isPlaying == null) {
             Loggi.w("CommonMusicAppReceiver track info does not contains playing state, ignoring");
@@ -138,7 +138,7 @@ public abstract class CommonMusicAppReceiver extends BroadcastReceiver {
         return handleTrackIntent;
     }
 
-/*
+
     public static Track parseFromIntentExtras(final Intent intent) {
         final Track track = new Track();
 
@@ -151,5 +151,4 @@ public abstract class CommonMusicAppReceiver extends BroadcastReceiver {
 
         return track;
     }
-*/
 }
