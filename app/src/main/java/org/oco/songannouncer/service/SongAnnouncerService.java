@@ -1,5 +1,6 @@
 package org.oco.songannouncer.service;
 
+import java.util.Locale;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
@@ -15,6 +16,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.widget.RemoteViews;
 import android.widget.Toast;
+import android.speech.tts.TextToSpeech;
 
 import org.json.JSONObject;
 
@@ -60,7 +62,8 @@ public class SongAnnouncerService extends Service {
     private long lastScrobbleTime = 0;
 
     private Intent lastIntent;
-    private String toast;
+
+    private TextToSpeech tts;
 
 //    private IgnoredPlayersDBHelper ignoredPlayersDBHelper;
 
@@ -74,6 +77,31 @@ public class SongAnnouncerService extends Service {
     public void onCreate() {
         super.onCreate();
         Loggi.i("WAILService onCreate()");
+
+        tts=new TextToSpeech(SongAnnouncerService.this, new TextToSpeech.OnInitListener() {
+
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS){
+                    int result = tts.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA ||
+                            result==TextToSpeech.LANG_NOT_SUPPORTED){
+                        Loggi.e("This Language is not supported");
+                    }
+                }
+                else
+                    Loggi.e("TTS Initilization Failed!");
+            }
+        });
+
+    }
+
+    @Override
+    public void onDestroy() {
+        if(tts != null){
+            tts.stop();
+            tts.shutdown();
+        }
     }
 
     @Override
@@ -158,71 +186,16 @@ public class SongAnnouncerService extends Service {
             @Override
             protected void onPostExecute(Void aVoid) {
                 if (lastUpdatedNowPlayingTrackInfo != null) {
-                    String text = lastUpdatedNowPlayingTrackInfo.getTrack() + " by " + lastUpdatedNowPlayingTrackInfo.getArtist();
+                    String text = "Now playing " + lastUpdatedNowPlayingTrackInfo.getTrack() + " by " + lastUpdatedNowPlayingTrackInfo.getArtist();
                     Toast.makeText(SongAnnouncerService.this, text, Toast.LENGTH_LONG).show();
+
+                    if (tts != null) {
+                        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+                    }
                 }
             }
 
         });
-    }
-
-    public static class LastCapturedTrackInfo {
-
-        private Track track;
-        private boolean isPlaying;
-
-        public LastCapturedTrackInfo(Track track, boolean isPlaying) {
-            this.track = track;
-            this.isPlaying = isPlaying;
-        }
-
-        public Track getTrack() {
-            return track;
-        }
-
-        public boolean isPlaying() {
-            return isPlaying;
-        }
-
-        public String toJSON() {
-            final JSONObject json = new JSONObject();
-
-            try {
-                json.put("playerPackageName", track.getPlayerPackageName());
-                json.put("track", track.getTrack());
-                json.put("artist", track.getArtist());
-                json.put("album", track.getAlbum());
-                json.put("duration", track.getDuration());
-                json.put("timestamp", track.getTimestamp());
-                json.put("state", track.getState());
-                json.put("stateTimestamp", track.getStateTimestamp());
-                json.put("isPlaying", isPlaying);
-            } catch (Exception e) {
-                return null;
-            }
-
-            return json.toString();
-        }
-
-        public static LastCapturedTrackInfo fromJSON(String jsonString) {
-            try {
-                final JSONObject json = new JSONObject(jsonString);
-                final Track track = new Track();
-
-                track.setPlayerPackageName(json.optString("playerPackageName"));
-                track.setTrack(json.optString("track"));
-                track.setArtist(json.optString("artist"));
-                track.setAlbum(json.optString("album"));
-                track.setDuration(json.optLong("duration"));
-                track.setTimestamp(json.optLong("timestamp"));
-                track.setState(json.optInt("state"));
-                track.setStateTimestamp(json.optLong("stateTimestamp"));
-
-                return new LastCapturedTrackInfo(track, json.optBoolean("isPlaying"));
-            } catch (Exception e) {
-                return null;
-            }
-        }
     }
 
 }
