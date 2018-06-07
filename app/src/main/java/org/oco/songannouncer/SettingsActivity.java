@@ -1,5 +1,8 @@
 package org.oco.songannouncer;
 
+// @TODO Code cleanup
+// @TODO Speech channel, speech volume
+
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
