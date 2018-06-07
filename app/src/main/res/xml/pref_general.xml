@@ -54,6 +54,7 @@
 
         <ListPreference
             android:dependency="enable_speech"
+            android:defaultValue="en-US"
             android:key="speech_language"
             android:negativeButtonText="@null"
             android:positiveButtonText="@null"

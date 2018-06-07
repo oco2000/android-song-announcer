@@ -20,8 +20,6 @@
     <string name="pref_title_speech_format">Speech format</string>
     <string name="pref_default_speech_format">Now playing %T by %A</string>
 
-
-
     <string name="pref_title_speech_language">Speech Language</string>
 
     <!-- Example settings for Data & Sync -->
@@ -65,4 +63,6 @@
 
     <string name="pref_about_title">About the App</string>
     <string name="pref_about_description">SongAnnouncer will speak the song title currently played by any player that supports SimpleLastFM or ScrobbleDroid scrobblers</string>
+
+    <string name="pref_version_title">Version</string>
 </resources>

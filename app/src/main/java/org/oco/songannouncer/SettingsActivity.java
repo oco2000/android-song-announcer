@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.speech.tts.TextToSpeech;
 
 
+import org.oco.songannouncer.util.LocaleUtil;
 import org.oco.songannouncer.util.Loggi;
 
 import java.util.ArrayList;
@@ -62,7 +63,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 preference.setSummary(
                         index >= 0
                                 ? listPreference.getEntries()[index]
-                                : null);
+                                : stringValue);
 
             } else {
                 // For all other preferences, set the summary to the value's
@@ -163,7 +164,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             setHasOptionsMenu(true);
 
             final ListPreference languages = (ListPreference) findPreference("speech_language");
-
             // THIS IS REQUIRED IF YOU DON'T HAVE 'entries' and 'entryValues' in your XML
             setLanguages(languages);
 
@@ -184,17 +184,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onDestroy();
         }
 
-        public static String getLocaleCode(Locale l) {
-            String code = l.getLanguage();
-            String country = l.getCountry();
-            return code + (country.isEmpty() ? "" : "-" + country);
-        }
-
-        public static String getLocaleName(Locale l) {
-            String name = l.getDisplayName().substring(0, 1).toUpperCase() + l.getDisplayName().substring(1);
-            return name + " (" + getLocaleCode(l) + ")";
-        }
-
         protected void setLanguages(ListPreference lpr) {
             final ListPreference lp = lpr;
             tts = new TextToSpeech(lp.getContext(), new TextToSpeech.OnInitListener() {
@@ -208,15 +197,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                             Collections.sort(locales, new Comparator<Locale>() {
                                 @Override
                                 public int compare(final Locale a, final Locale b) {
-                                    return getLocaleName(a).compareTo(getLocaleName(b));
+                                    return LocaleUtil.getLocaleName(a).compareTo(LocaleUtil.getLocaleName(b));
                                 }
                             });
 
                             ArrayList<CharSequence> entries = new ArrayList();
                             ArrayList<CharSequence> entryValues = new ArrayList();
                             for (Locale locale : locales) {
-                                entries.add(getLocaleName(locale));
-                                entryValues.add(getLocaleCode(locale));
+                                entries.add(LocaleUtil.getLocaleName(locale));
+                                entryValues.add(LocaleUtil.getLocaleCode(locale));
                             }
                             lp.setEntries(entries.toArray(new CharSequence[entries.size()]));
                             lp.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
@@ -251,6 +240,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_about);
             setHasOptionsMenu(true);
+
+            final Preference version = findPreference("pref_version_info");
+            version.setSummary(BuildConfig.VERSION_NAME + "." + BuildConfig.VERSION_CODE);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
