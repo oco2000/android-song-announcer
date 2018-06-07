@@ -18,8 +18,18 @@ import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.text.TextUtils;
 import android.view.MenuItem;
+import android.speech.tts.TextToSpeech;
 
+
+import org.oco.songannouncer.util.Loggi;
+import org.w3c.dom.Text;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -167,11 +177,18 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment extends PreferenceFragment {
+        private static TextToSpeech tts;
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
+
+            final ListPreference languages = (ListPreference) findPreference("speech_language");
+
+            // THIS IS REQUIRED IF YOU DON'T HAVE 'entries' and 'entryValues' in your XML
+            setLanguages(languages);
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
@@ -179,6 +196,60 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("message_format"));
             bindPreferenceSummaryToValue(findPreference("speech_format"));
+            bindPreferenceSummaryToValue(languages);
+        }
+
+        @Override
+        public void onDestroy() {
+            if (tts != null) {
+                tts.shutdown();
+            }
+            super.onDestroy();
+        }
+
+        public static String getLocaleCode(Locale l) {
+            String code = l.getLanguage();
+            String country = l.getCountry();
+            return code + (country.isEmpty() ? "" : "-" + country);
+        }
+
+        public static String getLocaleName(Locale l) {
+            String name = l.getDisplayName().substring(0, 1).toUpperCase() + l.getDisplayName().substring(1);
+            return name + " (" + getLocaleCode(l) + ")";
+        }
+
+        protected void setLanguages(ListPreference lpr) {
+            final ListPreference lp = lpr;
+            tts = new TextToSpeech(lp.getContext(), new TextToSpeech.OnInitListener() {
+
+                @Override
+                public void onInit(int status) {
+                    if (status == TextToSpeech.SUCCESS) {
+                        if (tts != null) {
+                            Set<Locale> sLocales = tts.getAvailableLanguages();   // returns a set of available locales
+                            ArrayList<Locale> locales= new ArrayList<>(sLocales);
+                            Collections.sort(locales, new Comparator<Locale>() {
+                                @Override
+                                public int compare(final Locale a, final Locale b) {
+                                    return getLocaleName(a).compareTo(getLocaleName(b));
+                                }
+                            });
+
+                            ArrayList<CharSequence> entries = new ArrayList();
+                            ArrayList<CharSequence> entryValues = new ArrayList();
+                            for (Locale locale : locales) {
+                                entries.add(getLocaleName(locale));
+                                entryValues.add(getLocaleCode(locale));
+                            }
+                            lp.setEntries(entries.toArray(new CharSequence[entries.size()]));
+                            lp.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+                            lp.setDefaultValue("en-US");
+                        }
+                    } else
+                        Loggi.e("TTS Initialization Failed!");
+
+                }
+            });
         }
 
         @Override

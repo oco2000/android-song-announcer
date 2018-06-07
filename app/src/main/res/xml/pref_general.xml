@@ -52,6 +52,13 @@
             android:singleLine="true"
             android:title="@string/pref_title_speech_format" />
 
+        <ListPreference
+            android:dependency="enable_speech"
+            android:key="speech_language"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_title_speech_language" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

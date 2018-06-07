@@ -153,6 +153,14 @@ public class SongAnnouncerService extends Service {
 
                     if (Settings.isSpeechEnabled(SongAnnouncerService.this) && tts != null) {
                         text = lastUpdatedNowPlayingTrackInfo.format(Settings.getSpeechFormat(SongAnnouncerService.this));
+                        String lang = Settings.getLanguage(SongAnnouncerService.this);
+                        Locale locale = new Locale(lang);
+                        int result = tts.setLanguage(locale);
+                        if (result == TextToSpeech.LANG_MISSING_DATA ||
+                                result==TextToSpeech.LANG_NOT_SUPPORTED){
+                            Loggi.e("This Language is not supported (" + lang + ")");
+                            tts.setLanguage(Locale.US);
+                        }
                         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
                     }
                 }

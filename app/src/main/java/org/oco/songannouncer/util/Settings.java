@@ -9,11 +9,11 @@ import android.preference.PreferenceManager;
 
 public class Settings {
     // region keys
-    private static final String KEY_LOCALE                         = "KEY_LOCALE";
     private static final String KEY_ENABLE_MESSAGES                = "enable_messages";
     private static final String KEY_MESSAGE_FORMAT                 = "message_format";
     private static final String KEY_ENABLE_SPEECH                  = "enable_speech";
     private static final String KEY_SPEECH_FORMAT                  = "speech_format";
+    private static final String KEY_SPEECH_LANGUAGE                = "speech_language";
     // endregion
 
     private static SharedPreferences getSharedPreferences(Context context) {
@@ -21,7 +21,7 @@ public class Settings {
     }
 
     public static synchronized String getLanguage(Context context) {
-        return getSharedPreferences(context).getString(KEY_LOCALE, null);
+        return getSharedPreferences(context).getString(KEY_SPEECH_LANGUAGE, "en-US");
     }
 
     public static synchronized boolean isMessagesEnabled(Context context) {
