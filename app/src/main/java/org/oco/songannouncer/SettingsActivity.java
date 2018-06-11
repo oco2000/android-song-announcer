@@ -30,6 +30,7 @@ import org.oco.songannouncer.util.Loggi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -195,24 +196,37 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 public void onInit(int status) {
                     if (status == TextToSpeech.SUCCESS) {
                         if (tts != null) {
-                            Set<Locale> sLocales = tts.getAvailableLanguages();   // returns a set of available locales
-                            ArrayList<Locale> locales= new ArrayList<>(sLocales);
-                            Collections.sort(locales, new Comparator<Locale>() {
-                                @Override
-                                public int compare(final Locale a, final Locale b) {
-                                    return LocaleUtil.getLocaleName(a).compareTo(LocaleUtil.getLocaleName(b));
-                                }
-                            });
-
-                            ArrayList<CharSequence> entries = new ArrayList();
-                            ArrayList<CharSequence> entryValues = new ArrayList();
-                            for (Locale locale : locales) {
-                                entries.add(LocaleUtil.getLocaleName(locale));
-                                entryValues.add(LocaleUtil.getLocaleCode(locale));
+                            Set<Locale> sLocales = null;
+                            try {
+                                sLocales = tts.getAvailableLanguages();   // returns a set of available locales
+                            } catch (Exception e) {
+                                sLocales = new HashSet<>();
                             }
-                            lp.setEntries(entries.toArray(new CharSequence[entries.size()]));
-                            lp.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
-                            lp.setDefaultValue("en-US");
+
+                            if (sLocales.isEmpty()) {
+                                lp.setEnabled(false);
+                                lp.setSummary("No languages found, trying to use English");
+                            } else {
+                                ArrayList<Locale> locales = new ArrayList<>(sLocales);
+                                Collections.sort(locales, new Comparator<Locale>() {
+                                    @Override
+                                    public int compare(final Locale a, final Locale b) {
+                                        return LocaleUtil.getLocaleName(a).compareTo(LocaleUtil.getLocaleName(b));
+                                    }
+                                });
+
+                                ArrayList<CharSequence> entries = new ArrayList();
+                                ArrayList<CharSequence> entryValues = new ArrayList();
+                                for (Locale locale : locales) {
+                                    entries.add(LocaleUtil.getLocaleName(locale));
+                                    entryValues.add(LocaleUtil.getLocaleCode(locale));
+                                }
+
+                                lp.setEntries(entries.toArray(new CharSequence[entries.size()]));
+                                lp.setEntryValues(entryValues.toArray(new CharSequence[entryValues.size()]));
+                                lp.setDefaultValue("en-US");
+                            }
+
                         }
                     } else
                         Loggi.e("TTS Initialization Failed!");
