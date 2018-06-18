@@ -23,6 +23,8 @@ public class SongAnnouncerService extends Service {
     private static volatile Track lastUpdatedNowPlayingTrackInfo;
 
     private TextToSpeech tts;
+    private String postponedText;
+    private boolean ttsInitialized = false;
 
 //    private IgnoredPlayersDBHelper ignoredPlayersDBHelper;
 
@@ -42,10 +44,9 @@ public class SongAnnouncerService extends Service {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS){
-                    int result = tts.setLanguage(Locale.US);
-                    if (result == TextToSpeech.LANG_MISSING_DATA ||
-                            result==TextToSpeech.LANG_NOT_SUPPORTED){
-                        Loggi.e("This Language is not supported");
+                    ttsInitialized = true;
+                    if (postponedText != null) {
+                        speak(postponedText);
                     }
                 }
                 else
@@ -89,6 +90,24 @@ public class SongAnnouncerService extends Service {
         }
 
         return START_STICKY;
+    }
+
+    private void speak(String text) {
+        if (tts != null && ttsInitialized) {
+            String lang = Settings.getLanguage(SongAnnouncerService.this);
+            Locale locale = new Locale(lang);
+
+            postponedText = null;
+            int result = tts.setLanguage(locale);
+            if (result == TextToSpeech.LANG_MISSING_DATA ||
+                    result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Loggi.e("This Language is not supported (" + lang + ")");
+                tts.setLanguage(Locale.US);
+            }
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+        } else {
+            postponedText = text;
+        }
     }
 
     private synchronized void updateNowPlaying(Track track) {
@@ -151,17 +170,9 @@ public class SongAnnouncerService extends Service {
                         Toast.makeText(SongAnnouncerService.this, text, Toast.LENGTH_LONG).show();
                     }
 
-                    if (Settings.isSpeechEnabled(SongAnnouncerService.this) && tts != null) {
+                    if (Settings.isSpeechEnabled(SongAnnouncerService.this)) {
                         text = lastUpdatedNowPlayingTrackInfo.format(Settings.getSpeechFormat(SongAnnouncerService.this));
-                        String lang = Settings.getLanguage(SongAnnouncerService.this);
-                        Locale locale = new Locale(lang);
-                        int result = tts.setLanguage(locale);
-                        if (result == TextToSpeech.LANG_MISSING_DATA ||
-                                result==TextToSpeech.LANG_NOT_SUPPORTED){
-                            Loggi.e("This Language is not supported (" + lang + ")");
-                            tts.setLanguage(Locale.US);
-                        }
-                        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null);
+                        speak(text);
                     }
                 }
             }

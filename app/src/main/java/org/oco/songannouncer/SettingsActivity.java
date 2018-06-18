@@ -1,7 +1,6 @@
 package org.oco.songannouncer;
 
 // @TODO Speech channel, speech volume
-// @TODO Postpone speech until tts is initialized
 
 import android.annotation.TargetApi;
 import android.content.Context;
