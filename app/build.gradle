@@ -1,6 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+        }
+    }
     compileSdkVersion 22
     defaultConfig {
         applicationId "org.oco.songannouncer"
